@@ -22,7 +22,7 @@ model Carga {
   duplicados          Json?
   usuario             String?            @db.VarChar(100)
   createdAt           DateTime           @default(now()) @map("created_at")
-  updatedAt           DateTime           @map("updated_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
   cliente             Cliente?           @relation(fields: [clienteId], references: [id])
   sellIn              SellIn[]
   sellOutInventario   SellOutInventario[]
@@ -40,7 +40,7 @@ model Cliente {
   tieneSellOut       Boolean              @default(false) @map("tiene_sell_out")
   activo             Boolean              @default(true)
   createdAt          DateTime             @default(now()) @map("created_at")
-  updatedAt          DateTime             @map("updated_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
   cargas             Carga[]
   mapeos             ProductoClienteMapeo[]
   sellIn             SellIn[]
@@ -75,7 +75,7 @@ model Producto {
   unidadMedida      String?                @map("unidad_medida") @db.VarChar(20)
   activo            Boolean                @default(true)
   createdAt         DateTime               @default(now()) @map("created_at")
-  updatedAt         DateTime               @map("updated_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
   mapeos            ProductoClienteMapeo[]
   sellIn            SellIn[]
   sellOutInventario SellOutInventario[]

@@ -130,7 +130,7 @@ router.get('/heb/summary', async (_req: Request, res: Response) => {
       }),
       prisma.sellOutVentas.groupBy({
         by: ['tiendaId'],
-        where: { cliente_id: CLIENTE_HEB, tiendaId: { not: null } },
+        where: { clienteId: CLIENTE_HEB, tiendaId: { not: null } },
       }),
       prisma.sellOutVentas.groupBy({
         by: ['productoId'],
@@ -251,7 +251,7 @@ router.get('/fda/summary', async (_req: Request, res: Response) => {
       }),
       prisma.sellOutVentas.groupBy({
         by: ['tiendaId'],
-        where: { cliente_id: CLIENTE_FDA, tiendaId: { not: null } },
+        where: { clienteId: CLIENTE_FDA, tiendaId: { not: null } },
       }),
       prisma.sellOutVentas.groupBy({
         by: ['productoId'],
