@@ -16,7 +16,7 @@ export async function getProductoIdBySkuCliente(
   }
 
   // Buscar en BD
-  const mapeo = await prisma.producto_cliente_mapeo.findUnique({
+  const mapeo = await prisma.productoClienteMapeo.findUnique({
     where: {
       clienteId_skuCliente: {
         clienteId,
@@ -34,7 +34,7 @@ export async function getProductoIdBySkuCliente(
 
 // Obtener cliente_id a partir de código o nombre
 export async function getClienteIdByCodigo(codigo: string): Promise<number | null> {
-  const cliente = await prisma.clientes.findFirst({
+  const cliente = await prisma.cliente.findFirst({
     where: {
       OR: [
         { codigo: { equals: codigo, mode: 'insensitive' } },
@@ -53,7 +53,7 @@ export async function getTiendaId(
   codigoTienda: string,
   clienteId: number
 ): Promise<number | null> {
-  const tienda = await prisma.tiendas.findUnique({
+  const tienda = await prisma.tienda.findUnique({
     where: {
       clienteId_codigoTienda: {
         clienteId,
@@ -72,7 +72,7 @@ export async function getOrCreateTienda(
   clienteId: number,
   extras?: { nombre?: string; plaza?: string }
 ): Promise<number> {
-  let tienda = await prisma.tiendas.findUnique({
+  let tienda = await prisma.tienda.findUnique({
     where: {
       clienteId_codigoTienda: {
         clienteId,
@@ -83,7 +83,7 @@ export async function getOrCreateTienda(
   });
 
   if (!tienda) {
-    tienda = await prisma.tiendas.create({
+    tienda = await prisma.tienda.create({
       data: {
         clienteId,
         codigoTienda,
@@ -104,7 +104,7 @@ export function clearMapeoCache(): void {
 
 // Obtener todos los mapeos de un cliente (para carga masiva)
 export async function getMapeosByCliente(clienteId: number): Promise<Map<string, number>> {
-  const mapeos = await prisma.producto_cliente_mapeo.findMany({
+  const mapeos = await prisma.productoClienteMapeo.findMany({
     where: { clienteId, activo: true },
     select: { skuCliente: true, productoId: true }
   });
@@ -119,7 +119,7 @@ export async function getMapeosByCliente(clienteId: number): Promise<Map<string,
 
 // Obtener producto_id por SKU interno (para catálogos)
 export async function getProductoIdBySku(sku: string): Promise<number | null> {
-  const producto = await prisma.productos.findUnique({
+  const producto = await prisma.producto.findUnique({
     where: { sku },
     select: { id: true }
   });

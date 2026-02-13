@@ -14,7 +14,7 @@ async function checkSellInDuplicate(
   productoId: number,
   fecha: Date
 ): Promise<DuplicateCheckResult> {
-  const existing = await prisma.sell_in.findFirst({
+  const existing = await prisma.sellIn.findFirst({
     where: {
       clienteId,
       numeroOrden,
@@ -41,7 +41,7 @@ async function checkSellOutVentasDuplicate(
   productoId: number,
   fecha: Date
 ): Promise<DuplicateCheckResult> {
-  const existing = await prisma.sell_out_ventas.findFirst({
+  const existing = await prisma.sellOutVentas.findFirst({
     where: {
       clienteId,
       tiendaId,
@@ -67,7 +67,7 @@ async function checkSellOutInventarioDuplicate(
   productoId: number,
   fecha: Date
 ): Promise<DuplicateCheckResult> {
-  const existing = await prisma.sell_out_inventario.findFirst({
+  const existing = await prisma.sellOutInventario.findFirst({
     where: {
       clienteId,
       tiendaId,
@@ -87,7 +87,7 @@ async function checkSellOutInventarioDuplicate(
 
 // Verificar duplicado de Producto (catálogo)
 async function checkProductoDuplicate(sku: string): Promise<DuplicateCheckResult> {
-  const existing = await prisma.productos.findUnique({
+  const existing = await prisma.producto.findUnique({
     where: { sku }
   });
 
@@ -106,7 +106,7 @@ async function checkMapeoDuplicate(
   clienteId: number,
   skuCliente: string
 ): Promise<DuplicateCheckResult> {
-  const existing = await prisma.producto_cliente_mapeo.findUnique({
+  const existing = await prisma.productoClienteMapeo.findUnique({
     where: {
       clienteId_skuCliente: {
         clienteId,
@@ -180,7 +180,7 @@ export async function batchCheckSellIn(
   keys: Array<{ numeroOrden: string | null; productoId: number; fecha: Date }>
 ): Promise<Set<string>> {
   // Crear set de claves existentes
-  const existing = await prisma.sell_in.findMany({
+  const existing = await prisma.sellIn.findMany({
     where: {
       clienteId,
       OR: keys.map(k => ({
@@ -208,7 +208,7 @@ export async function batchCheckSellOutVentas(
   clienteId: number,
   keys: Array<{ tiendaId: number | null; productoId: number; fecha: Date }>
 ): Promise<Set<string>> {
-  const existing = await prisma.sell_out_ventas.findMany({
+  const existing = await prisma.sellOutVentas.findMany({
     where: {
       clienteId,
       OR: keys.map(k => ({

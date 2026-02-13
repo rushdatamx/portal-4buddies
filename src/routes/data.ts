@@ -29,7 +29,7 @@ router.get('/sell-in', async (req: Request, res: Response) => {
     }
 
     const [data, total] = await Promise.all([
-      prisma.sell_in.findMany({
+      prisma.sellIn.findMany({
         where,
         orderBy: { fecha: 'desc' },
         take: limit ? parseInt(limit as string) : 100,
@@ -39,7 +39,7 @@ router.get('/sell-in', async (req: Request, res: Response) => {
           producto: { select: { id: true, sku: true, nombre: true, categoria: true } }
         }
       }),
-      prisma.sell_in.count({ where })
+      prisma.sellIn.count({ where })
     ]);
 
     res.json({
@@ -90,7 +90,7 @@ router.get('/sell-out/ventas', async (req: Request, res: Response) => {
     }
 
     const [data, total] = await Promise.all([
-      prisma.sell_out_ventas.findMany({
+      prisma.sellOutVentas.findMany({
         where,
         orderBy: { fecha: 'desc' },
         take: limit ? parseInt(limit as string) : 100,
@@ -101,7 +101,7 @@ router.get('/sell-out/ventas', async (req: Request, res: Response) => {
           tienda: { select: { id: true, codigoTienda: true, nombre: true, plaza: true } }
         }
       }),
-      prisma.sell_out_ventas.count({ where })
+      prisma.sellOutVentas.count({ where })
     ]);
 
     res.json({
@@ -152,7 +152,7 @@ router.get('/sell-out/inventario', async (req: Request, res: Response) => {
     }
 
     const [data, total] = await Promise.all([
-      prisma.sell_out_inventario.findMany({
+      prisma.sellOutInventario.findMany({
         where,
         orderBy: { fecha: 'desc' },
         take: limit ? parseInt(limit as string) : 100,
@@ -163,7 +163,7 @@ router.get('/sell-out/inventario', async (req: Request, res: Response) => {
           tienda: { select: { id: true, codigoTienda: true, nombre: true, plaza: true } }
         }
       }),
-      prisma.sell_out_inventario.count({ where })
+      prisma.sellOutInventario.count({ where })
     ]);
 
     res.json({
@@ -195,15 +195,15 @@ router.get('/resumen', async (req: Request, res: Response) => {
     }
 
     const [sellInCount, sellOutVentasCount, sellOutInventarioCount, productos, clientes] = await Promise.all([
-      prisma.sell_in.count({ where }),
-      prisma.sell_out_ventas.count({ where }),
-      prisma.sell_out_inventario.count({ where }),
-      prisma.productos.count({ where: { activo: true } }),
-      prisma.clientes.count({ where: { activo: true } })
+      prisma.sellIn.count({ where }),
+      prisma.sellOutVentas.count({ where }),
+      prisma.sellOutInventario.count({ where }),
+      prisma.producto.count({ where: { activo: true } }),
+      prisma.cliente.count({ where: { activo: true } })
     ]);
 
     // Últimas cargas
-    const ultimasCargas = await prisma.cargas.findMany({
+    const ultimasCargas = await prisma.carga.findMany({
       where: { estatus: 'completado' },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -267,7 +267,7 @@ router.get('/sell-in/agregado', async (req: Request, res: Response) => {
       groupBy = ['clienteId', 'productoId'];
     }
 
-    const agregado = await prisma.sell_in.groupBy({
+    const agregado = await prisma.sellIn.groupBy({
       by: groupBy,
       where,
       _sum: {

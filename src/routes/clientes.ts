@@ -6,7 +6,7 @@ const router = Router();
 // GET /api/clientes/meta/tipos - Listar tipos únicos (DEBE IR ANTES DE /:id)
 router.get('/meta/tipos', async (_req: Request, res: Response) => {
   try {
-    const tipos = await prisma.clientes.findMany({
+    const tipos = await prisma.cliente.findMany({
       where: { activo: true },
       select: { tipo: true },
       distinct: ['tipo']
@@ -51,7 +51,7 @@ router.get('/', async (req: Request, res: Response) => {
       ];
     }
 
-    const clientes = await prisma.clientes.findMany({
+    const clientes = await prisma.cliente.findMany({
       where,
       orderBy: { nombre: 'asc' },
       include: {
@@ -83,7 +83,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const cliente = await prisma.clientes.findUnique({
+    const cliente = await prisma.cliente.findUnique({
       where: { id: parseInt(String(id)) },
       include: {
         tiendas: {
@@ -139,7 +139,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const existente = await prisma.clientes.findUnique({
+    const existente = await prisma.cliente.findUnique({
       where: { codigo }
     });
 
@@ -151,7 +151,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const cliente = await prisma.clientes.create({
+    const cliente = await prisma.cliente.create({
       data: {
         codigo,
         nombre,
@@ -179,7 +179,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { codigo, nombre, tipo, tieneSellOut, activo } = req.body;
 
-    const cliente = await prisma.clientes.update({
+    const cliente = await prisma.cliente.update({
       where: { id: parseInt(String(id)) },
       data: {
         ...(codigo && { codigo }),
@@ -208,7 +208,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const cliente = await prisma.clientes.update({
+    const cliente = await prisma.cliente.update({
       where: { id: parseInt(String(id)) },
       data: { activo: false }
     });

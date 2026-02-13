@@ -7,168 +7,181 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model cargas {
-  id                   Int                   @id @default(autoincrement())
-  tipo                 String                @db.VarChar(50)
-  cliente_id           Int?
-  nombre_archivo       String                @db.VarChar(255)
-  fecha_archivo        DateTime?             @db.Date
-  registros_totales    Int?
-  registros_nuevos     Int?
-  registros_duplicados Int?
-  registros_error      Int?
-  estatus              String                @default("pendiente") @db.VarChar(50)
-  errores              Json?
-  duplicados           Json?
-  usuario              String?               @db.VarChar(100)
-  created_at           DateTime              @default(now())
-  updated_at           DateTime
-  clientes             clientes?             @relation(fields: [cliente_id], references: [id])
-  sell_in              sell_in[]
-  sell_out_inventario  sell_out_inventario[]
-  sell_out_ventas      sell_out_ventas[]
-  staging_registros    staging_registros[]
+model Carga {
+  id                  Int                @id @default(autoincrement())
+  tipo                String             @db.VarChar(50)
+  clienteId           Int?               @map("cliente_id")
+  nombreArchivo       String             @map("nombre_archivo") @db.VarChar(255)
+  fechaArchivo        DateTime?          @map("fecha_archivo") @db.Date
+  registrosTotales    Int?               @map("registros_totales")
+  registrosNuevos     Int?               @map("registros_nuevos")
+  registrosDuplicados Int?               @map("registros_duplicados")
+  registrosError      Int?               @map("registros_error")
+  estatus             String             @default("pendiente") @db.VarChar(50)
+  errores             Json?
+  duplicados          Json?
+  usuario             String?            @db.VarChar(100)
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @map("updated_at")
+  cliente             Cliente?           @relation(fields: [clienteId], references: [id])
+  sellIn              SellIn[]
+  sellOutInventario   SellOutInventario[]
+  sellOutVentas       SellOutVentas[]
+  stagingRegistros    StagingRegistro[]
+
+  @@map("cargas")
 }
 
-model clientes {
-  id                     Int                      @id @default(autoincrement())
-  codigo                 String                   @unique @db.VarChar(50)
-  nombre                 String                   @db.VarChar(255)
-  tipo                   String?                  @db.VarChar(50)
-  tiene_sell_out         Boolean                  @default(false)
-  activo                 Boolean                  @default(true)
-  created_at             DateTime                 @default(now())
-  updated_at             DateTime
-  cargas                 cargas[]
-  producto_cliente_mapeo producto_cliente_mapeo[]
-  sell_in                sell_in[]
-  sell_out_inventario    sell_out_inventario[]
-  sell_out_ventas        sell_out_ventas[]
-  tiendas                tiendas[]
+model Cliente {
+  id                 Int                  @id @default(autoincrement())
+  codigo             String               @unique @db.VarChar(50)
+  nombre             String               @db.VarChar(255)
+  tipo               String?              @db.VarChar(50)
+  tieneSellOut       Boolean              @default(false) @map("tiene_sell_out")
+  activo             Boolean              @default(true)
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @map("updated_at")
+  cargas             Carga[]
+  mapeos             ProductoClienteMapeo[]
+  sellIn             SellIn[]
+  sellOutInventario  SellOutInventario[]
+  sellOutVentas      SellOutVentas[]
+  tiendas            Tienda[]
+
+  @@map("clientes")
 }
 
-model producto_cliente_mapeo {
-  id             Int       @id @default(autoincrement())
-  producto_id    Int
-  cliente_id     Int
-  sku_cliente    String    @db.VarChar(100)
-  nombre_cliente String?   @db.VarChar(255)
-  activo         Boolean   @default(true)
-  created_at     DateTime  @default(now())
-  clientes       clientes  @relation(fields: [cliente_id], references: [id])
-  productos      productos @relation(fields: [producto_id], references: [id])
-
-  @@unique([cliente_id, sku_cliente])
-}
-
-model productos {
-  id                     Int                      @id @default(autoincrement())
-  sku                    String                   @unique @db.VarChar(50)
-  nombre                 String                   @db.VarChar(255)
-  categoria              String?                  @db.VarChar(100)
-  subcategoria           String?                  @db.VarChar(100)
-  unidad_medida          String?                  @db.VarChar(20)
-  activo                 Boolean                  @default(true)
-  created_at             DateTime                 @default(now())
-  updated_at             DateTime
-  producto_cliente_mapeo producto_cliente_mapeo[]
-  sell_in                sell_in[]
-  sell_out_inventario    sell_out_inventario[]
-  sell_out_ventas        sell_out_ventas[]
-}
-
-model sell_in {
-  id              Int       @id @default(autoincrement())
-  cliente_id      Int
-  producto_id     Int
-  fecha           DateTime  @db.Date
-  numero_orden    String?   @db.VarChar(100)
-  sku_cliente     String?   @db.VarChar(100)
-  cantidad        Decimal   @db.Decimal(12, 2)
-  precio_unitario Decimal?  @db.Decimal(12, 2)
-  importe_total   Decimal?  @db.Decimal(12, 2)
-  moneda          String    @default("MXN") @db.VarChar(10)
-  estatus         String?   @db.VarChar(50)
-  archivo_origen  String?   @db.VarChar(255)
-  fila_origen     Int?
-  carga_id        Int?
-  created_at      DateTime  @default(now())
-  cargas          cargas?   @relation(fields: [carga_id], references: [id])
-  clientes        clientes  @relation(fields: [cliente_id], references: [id])
-  productos       productos @relation(fields: [producto_id], references: [id])
-
-  @@unique([cliente_id, numero_orden, producto_id, fecha])
-}
-
-model sell_out_inventario {
-  id                  Int       @id @default(autoincrement())
-  cliente_id          Int
-  tienda_id           Int?
-  producto_id         Int
-  fecha               DateTime  @db.Date
-  sku_cliente         String?   @db.VarChar(100)
-  unidades_inventario Decimal   @db.Decimal(12, 2)
-  archivo_origen      String?   @db.VarChar(255)
-  fila_origen         Int?
-  carga_id            Int?
-  created_at          DateTime  @default(now())
-  cargas              cargas?   @relation(fields: [carga_id], references: [id])
-  clientes            clientes  @relation(fields: [cliente_id], references: [id])
-  productos           productos @relation(fields: [producto_id], references: [id])
-  tiendas             tiendas?  @relation(fields: [tienda_id], references: [id])
-
-  @@unique([cliente_id, tienda_id, producto_id, fecha])
-}
-
-model sell_out_ventas {
-  id              Int       @id @default(autoincrement())
-  cliente_id      Int
-  tienda_id       Int?
-  producto_id     Int
-  fecha           DateTime  @db.Date
-  sku_cliente     String?   @db.VarChar(100)
-  unidades        Decimal   @db.Decimal(12, 2)
-  importe         Decimal?  @db.Decimal(12, 2)
-  precio_costo    Decimal?  @db.Decimal(12, 2)
-  es_dato_mensual Boolean   @default(false)
-  archivo_origen  String?   @db.VarChar(255)
-  fila_origen     Int?
-  carga_id        Int?
-  created_at      DateTime  @default(now())
-  cargas          cargas?   @relation(fields: [carga_id], references: [id])
-  clientes        clientes  @relation(fields: [cliente_id], references: [id])
-  productos       productos @relation(fields: [producto_id], references: [id])
-  tiendas         tiendas?  @relation(fields: [tienda_id], references: [id])
-
-  @@unique([cliente_id, tienda_id, producto_id, fecha])
-}
-
-model staging_registros {
+model ProductoClienteMapeo {
   id            Int      @id @default(autoincrement())
-  carga_id      Int
-  tipo_tabla    String?  @db.VarChar(50)
-  datos         Json
-  es_duplicado  Boolean  @default(false)
-  duplicado_de  Int?
-  tiene_error   Boolean  @default(false)
-  mensaje_error String?
-  created_at    DateTime @default(now())
-  cargas        cargas   @relation(fields: [carga_id], references: [id], onDelete: Cascade)
+  productoId    Int      @map("producto_id")
+  clienteId     Int      @map("cliente_id")
+  skuCliente    String   @map("sku_cliente") @db.VarChar(100)
+  nombreCliente String?  @map("nombre_cliente") @db.VarChar(255)
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  producto      Producto @relation(fields: [productoId], references: [id])
+
+  @@unique([clienteId, skuCliente], name: "clienteId_skuCliente")
+  @@map("producto_cliente_mapeo")
 }
 
-model tiendas {
-  id                  Int                   @id @default(autoincrement())
-  cliente_id          Int
-  codigo_tienda       String                @db.VarChar(100)
-  nombre              String?               @db.VarChar(255)
-  plaza               String?               @db.VarChar(100)
-  estado              String?               @db.VarChar(100)
-  ciudad              String?               @db.VarChar(100)
-  activo              Boolean               @default(true)
-  created_at          DateTime              @default(now())
-  sell_out_inventario sell_out_inventario[]
-  sell_out_ventas     sell_out_ventas[]
-  clientes            clientes              @relation(fields: [cliente_id], references: [id])
+model Producto {
+  id                Int                    @id @default(autoincrement())
+  sku               String                 @unique @db.VarChar(50)
+  nombre            String                 @db.VarChar(255)
+  categoria         String?                @db.VarChar(100)
+  subcategoria      String?                @db.VarChar(100)
+  unidadMedida      String?                @map("unidad_medida") @db.VarChar(20)
+  activo            Boolean                @default(true)
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @map("updated_at")
+  mapeos            ProductoClienteMapeo[]
+  sellIn            SellIn[]
+  sellOutInventario SellOutInventario[]
+  sellOutVentas     SellOutVentas[]
 
-  @@unique([cliente_id, codigo_tienda])
+  @@map("productos")
+}
+
+model SellIn {
+  id             Int      @id @default(autoincrement())
+  clienteId      Int      @map("cliente_id")
+  productoId     Int      @map("producto_id")
+  fecha          DateTime @db.Date
+  numeroOrden    String?  @map("numero_orden") @db.VarChar(100)
+  skuCliente     String?  @map("sku_cliente") @db.VarChar(100)
+  cantidad       Decimal  @db.Decimal(12, 2)
+  precioUnitario Decimal? @map("precio_unitario") @db.Decimal(12, 2)
+  importeTotal   Decimal? @map("importe_total") @db.Decimal(12, 2)
+  moneda         String   @default("MXN") @db.VarChar(10)
+  estatus        String?  @db.VarChar(50)
+  archivoOrigen  String?  @map("archivo_origen") @db.VarChar(255)
+  filaOrigen     Int?     @map("fila_origen")
+  cargaId        Int?     @map("carga_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  carga          Carga?   @relation(fields: [cargaId], references: [id])
+  cliente        Cliente  @relation(fields: [clienteId], references: [id])
+  producto       Producto @relation(fields: [productoId], references: [id])
+
+  @@unique([clienteId, numeroOrden, productoId, fecha])
+  @@map("sell_in")
+}
+
+model SellOutInventario {
+  id                 Int      @id @default(autoincrement())
+  clienteId          Int      @map("cliente_id")
+  tiendaId           Int?     @map("tienda_id")
+  productoId         Int      @map("producto_id")
+  fecha              DateTime @db.Date
+  skuCliente         String?  @map("sku_cliente") @db.VarChar(100)
+  unidadesInventario Decimal  @map("unidades_inventario") @db.Decimal(12, 2)
+  archivoOrigen      String?  @map("archivo_origen") @db.VarChar(255)
+  filaOrigen         Int?     @map("fila_origen")
+  cargaId            Int?     @map("carga_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  carga              Carga?   @relation(fields: [cargaId], references: [id])
+  cliente            Cliente  @relation(fields: [clienteId], references: [id])
+  producto           Producto @relation(fields: [productoId], references: [id])
+  tienda             Tienda?  @relation(fields: [tiendaId], references: [id])
+
+  @@unique([clienteId, tiendaId, productoId, fecha])
+  @@map("sell_out_inventario")
+}
+
+model SellOutVentas {
+  id            Int      @id @default(autoincrement())
+  clienteId     Int      @map("cliente_id")
+  tiendaId      Int?     @map("tienda_id")
+  productoId    Int      @map("producto_id")
+  fecha         DateTime @db.Date
+  skuCliente    String?  @map("sku_cliente") @db.VarChar(100)
+  unidades      Decimal  @db.Decimal(12, 2)
+  importe       Decimal? @db.Decimal(12, 2)
+  precioCosto   Decimal? @map("precio_costo") @db.Decimal(12, 2)
+  esDatoMensual Boolean  @default(false) @map("es_dato_mensual")
+  archivoOrigen String?  @map("archivo_origen") @db.VarChar(255)
+  filaOrigen    Int?     @map("fila_origen")
+  cargaId       Int?     @map("carga_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  carga         Carga?   @relation(fields: [cargaId], references: [id])
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  producto      Producto @relation(fields: [productoId], references: [id])
+  tienda        Tienda?  @relation(fields: [tiendaId], references: [id])
+
+  @@unique([clienteId, tiendaId, productoId, fecha])
+  @@map("sell_out_ventas")
+}
+
+model StagingRegistro {
+  id           Int      @id @default(autoincrement())
+  cargaId      Int      @map("carga_id")
+  tipoTabla    String?  @map("tipo_tabla") @db.VarChar(50)
+  datos        Json
+  esDuplicado  Boolean  @default(false) @map("es_duplicado")
+  duplicadoDe  Int?     @map("duplicado_de")
+  tieneError   Boolean  @default(false) @map("tiene_error")
+  mensajeError String?  @map("mensaje_error")
+  createdAt    DateTime @default(now()) @map("created_at")
+  carga        Carga    @relation(fields: [cargaId], references: [id], onDelete: Cascade)
+
+  @@map("staging_registros")
+}
+
+model Tienda {
+  id                Int                 @id @default(autoincrement())
+  clienteId         Int                 @map("cliente_id")
+  codigoTienda      String              @map("codigo_tienda") @db.VarChar(100)
+  nombre            String?             @db.VarChar(255)
+  plaza             String?             @db.VarChar(100)
+  estado            String?             @db.VarChar(100)
+  ciudad            String?             @db.VarChar(100)
+  activo            Boolean             @default(true)
+  createdAt         DateTime            @default(now()) @map("created_at")
+  sellOutInventario SellOutInventario[]
+  sellOutVentas     SellOutVentas[]
+  cliente           Cliente             @relation(fields: [clienteId], references: [id])
+
+  @@unique([clienteId, codigoTienda], name: "clienteId_codigoTienda")
+  @@map("tiendas")
 }

@@ -23,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     const [cargas, total] = await Promise.all([
-      prisma.cargas.findMany({
+      prisma.carga.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take: limit ? parseInt(String(limit)) : 50,
@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
           }
         }
       }),
-      prisma.cargas.count({ where })
+      prisma.carga.count({ where })
     ]);
 
     res.json({
@@ -62,16 +62,16 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/stats/resumen', async (_req: Request, res: Response) => {
   try {
     const [total, porTipo, porEstatus, ultimaSemana] = await Promise.all([
-      prisma.cargas.count(),
-      prisma.cargas.groupBy({
+      prisma.carga.count(),
+      prisma.carga.groupBy({
         by: ['tipo'],
         _count: { id: true }
       }),
-      prisma.cargas.groupBy({
+      prisma.carga.groupBy({
         by: ['estatus'],
         _count: { id: true }
       }),
-      prisma.cargas.findMany({
+      prisma.carga.findMany({
         where: {
           createdAt: {
             gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -113,7 +113,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const carga = await prisma.cargas.findUnique({
+    const carga = await prisma.carga.findUnique({
       where: { id: parseInt(String(id)) },
       include: {
         cliente: true,
@@ -174,11 +174,11 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    await prisma.staging_registros.deleteMany({
+    await prisma.stagingRegistro.deleteMany({
       where: { cargaId: parseInt(String(id)) }
     });
 
-    await prisma.cargas.delete({
+    await prisma.carga.delete({
       where: { id: parseInt(String(id)) }
     });
 

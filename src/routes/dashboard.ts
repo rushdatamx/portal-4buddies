@@ -12,12 +12,12 @@ const prisma = new PrismaClient();
 router.get('/sell-in/summary', async (_req: Request, res: Response) => {
   try {
     const [aggregate, clientes, productos] = await Promise.all([
-      prisma.sell_in.aggregate({
-        _sum: { cantidad: true, importe_total: true },
+      prisma.sellIn.aggregate({
+        _sum: { cantidad: true, importeTotal: true },
         _count: true,
       }),
-      prisma.sell_in.groupBy({ by: ['cliente_id'] }),
-      prisma.sell_in.groupBy({ by: ['producto_id'] }),
+      prisma.sellIn.groupBy({ by: ['clienteId'] }),
+      prisma.sellIn.groupBy({ by: ['productoId'] }),
     ]);
 
     res.json({
@@ -25,7 +25,7 @@ router.get('/sell-in/summary', async (_req: Request, res: Response) => {
       data: {
         totalPedidos: aggregate._count,
         totalUnidades: Number(aggregate._sum.cantidad) || 0,
-        totalImporte: Number(aggregate._sum.importe_total) || 0,
+        totalImporte: Number(aggregate._sum.importeTotal) || 0,
         clientesActivos: clientes.length,
         productosVendidos: productos.length,
       },
@@ -123,18 +123,18 @@ const CLIENTE_HEB = 1;
 router.get('/heb/summary', async (_req: Request, res: Response) => {
   try {
     const [aggregate, tiendas, productos] = await Promise.all([
-      prisma.sell_out_ventas.aggregate({
-        where: { cliente_id: CLIENTE_HEB },
+      prisma.sellOutVentas.aggregate({
+        where: { clienteId: CLIENTE_HEB },
         _sum: { unidades: true, importe: true },
         _count: true,
       }),
-      prisma.sell_out_ventas.groupBy({
-        by: ['tienda_id'],
-        where: { cliente_id: CLIENTE_HEB, tienda_id: { not: null } },
+      prisma.sellOutVentas.groupBy({
+        by: ['tiendaId'],
+        where: { cliente_id: CLIENTE_HEB, tiendaId: { not: null } },
       }),
-      prisma.sell_out_ventas.groupBy({
-        by: ['producto_id'],
-        where: { cliente_id: CLIENTE_HEB },
+      prisma.sellOutVentas.groupBy({
+        by: ['productoId'],
+        where: { clienteId: CLIENTE_HEB },
       }),
     ]);
 
@@ -244,20 +244,20 @@ const CLIENTE_FDA = 47;
 router.get('/fda/summary', async (_req: Request, res: Response) => {
   try {
     const [aggregate, tiendas, productos, totalTiendas] = await Promise.all([
-      prisma.sell_out_ventas.aggregate({
-        where: { cliente_id: CLIENTE_FDA },
+      prisma.sellOutVentas.aggregate({
+        where: { clienteId: CLIENTE_FDA },
         _sum: { unidades: true },
         _count: true,
       }),
-      prisma.sell_out_ventas.groupBy({
-        by: ['tienda_id'],
-        where: { cliente_id: CLIENTE_FDA, tienda_id: { not: null } },
+      prisma.sellOutVentas.groupBy({
+        by: ['tiendaId'],
+        where: { cliente_id: CLIENTE_FDA, tiendaId: { not: null } },
       }),
-      prisma.sell_out_ventas.groupBy({
-        by: ['producto_id'],
-        where: { cliente_id: CLIENTE_FDA },
+      prisma.sellOutVentas.groupBy({
+        by: ['productoId'],
+        where: { clienteId: CLIENTE_FDA },
       }),
-      prisma.tiendas.count({ where: { cliente_id: CLIENTE_FDA } }),
+      prisma.tienda.count({ where: { clienteId: CLIENTE_FDA } }),
     ]);
 
     const sucursalesActivas = tiendas.length;

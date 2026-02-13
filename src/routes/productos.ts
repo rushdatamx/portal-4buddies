@@ -6,7 +6,7 @@ const router = Router();
 // GET /api/productos/meta/categorias - Listar categorías únicas (DEBE IR ANTES DE /:id)
 router.get('/meta/categorias', async (_req: Request, res: Response) => {
   try {
-    const categorias = await prisma.productos.findMany({
+    const categorias = await prisma.producto.findMany({
       where: { activo: true },
       select: { categoria: true },
       distinct: ['categoria']
@@ -47,7 +47,7 @@ router.get('/', async (req: Request, res: Response) => {
       ];
     }
 
-    const productos = await prisma.productos.findMany({
+    const productos = await prisma.producto.findMany({
       where,
       orderBy: { nombre: 'asc' },
       include: {
@@ -76,7 +76,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const producto = await prisma.productos.findUnique({
+    const producto = await prisma.producto.findUnique({
       where: { id: parseInt(String(id)) },
       include: {
         mapeos: {
@@ -121,7 +121,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const existente = await prisma.productos.findUnique({
+    const existente = await prisma.producto.findUnique({
       where: { sku }
     });
 
@@ -133,7 +133,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const producto = await prisma.productos.create({
+    const producto = await prisma.producto.create({
       data: {
         sku,
         nombre,
@@ -162,7 +162,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { sku, nombre, categoria, subcategoria, unidadMedida, activo } = req.body;
 
-    const producto = await prisma.productos.update({
+    const producto = await prisma.producto.update({
       where: { id: parseInt(String(id)) },
       data: {
         ...(sku && { sku }),
@@ -192,7 +192,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const producto = await prisma.productos.update({
+    const producto = await prisma.producto.update({
       where: { id: parseInt(String(id)) },
       data: { activo: false }
     });

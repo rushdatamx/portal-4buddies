@@ -79,7 +79,7 @@ router.post('/preview', uploadMiddleware.single('file'), async (req: Request, re
     );
 
     // Obtener resumen de staging
-    const staging = await prisma.staging_registros.findMany({
+    const staging = await prisma.stagingRegistro.findMany({
       where: { cargaId: loadResult.cargaId },
       orderBy: { id: 'asc' },
       take: 100

@@ -16,7 +16,7 @@ router.get('/buscar/sku', async (req: Request, res: Response) => {
       return;
     }
 
-    const mapeo = await prisma.producto_cliente_mapeo.findUnique({
+    const mapeo = await prisma.productoClienteMapeo.findUnique({
       where: {
         clienteId_skuCliente: {
           clienteId: parseInt(String(clienteId)),
@@ -78,7 +78,7 @@ router.get('/', async (req: Request, res: Response) => {
       ];
     }
 
-    const mapeos = await prisma.producto_cliente_mapeo.findMany({
+    const mapeos = await prisma.productoClienteMapeo.findMany({
       where,
       orderBy: [
         { cliente: { nombre: 'asc' } },
@@ -113,7 +113,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const mapeo = await prisma.producto_cliente_mapeo.findUnique({
+    const mapeo = await prisma.productoClienteMapeo.findUnique({
       where: { id: parseInt(String(id)) },
       include: {
         producto: true,
@@ -155,7 +155,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const producto = await prisma.productos.findUnique({
+    const producto = await prisma.producto.findUnique({
       where: { id: productoId }
     });
 
@@ -167,7 +167,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const cliente = await prisma.clientes.findUnique({
+    const cliente = await prisma.cliente.findUnique({
       where: { id: clienteId }
     });
 
@@ -179,7 +179,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const existente = await prisma.producto_cliente_mapeo.findUnique({
+    const existente = await prisma.productoClienteMapeo.findUnique({
       where: {
         clienteId_skuCliente: {
           clienteId,
@@ -196,7 +196,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const mapeo = await prisma.producto_cliente_mapeo.create({
+    const mapeo = await prisma.productoClienteMapeo.create({
       data: {
         productoId,
         clienteId,
@@ -232,7 +232,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { productoId, skuCliente, nombreCliente, activo } = req.body;
 
-    const mapeo = await prisma.producto_cliente_mapeo.update({
+    const mapeo = await prisma.productoClienteMapeo.update({
       where: { id: parseInt(String(id)) },
       data: {
         ...(productoId && { productoId }),
@@ -268,7 +268,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const mapeo = await prisma.producto_cliente_mapeo.update({
+    const mapeo = await prisma.productoClienteMapeo.update({
       where: { id: parseInt(String(id)) },
       data: { activo: false }
     });

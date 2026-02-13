@@ -13,7 +13,7 @@ router.get('/meta/plazas', async (req: Request, res: Response) => {
       where.clienteId = parseInt(String(clienteId));
     }
 
-    const plazas = await prisma.tiendas.findMany({
+    const plazas = await prisma.tienda.findMany({
       where,
       select: { plaza: true },
       distinct: ['plaza']
@@ -58,7 +58,7 @@ router.get('/', async (req: Request, res: Response) => {
       ];
     }
 
-    const tiendas = await prisma.tiendas.findMany({
+    const tiendas = await prisma.tienda.findMany({
       where,
       orderBy: { nombre: 'asc' },
       include: {
@@ -87,7 +87,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const tienda = await prisma.tiendas.findUnique({
+    const tienda = await prisma.tienda.findUnique({
       where: { id: parseInt(String(id)) },
       include: {
         cliente: true,
@@ -134,7 +134,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const cliente = await prisma.clientes.findUnique({
+    const cliente = await prisma.cliente.findUnique({
       where: { id: clienteId }
     });
 
@@ -146,7 +146,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const existente = await prisma.tiendas.findUnique({
+    const existente = await prisma.tienda.findUnique({
       where: {
         clienteId_codigoTienda: {
           clienteId,
@@ -163,7 +163,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const tienda = await prisma.tiendas.create({
+    const tienda = await prisma.tienda.create({
       data: {
         clienteId,
         codigoTienda,
@@ -198,7 +198,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { codigoTienda, nombre, plaza, estado, ciudad, activo } = req.body;
 
-    const tienda = await prisma.tiendas.update({
+    const tienda = await prisma.tienda.update({
       where: { id: parseInt(String(id)) },
       data: {
         ...(codigoTienda && { codigoTienda }),
@@ -233,7 +233,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const tienda = await prisma.tiendas.update({
+    const tienda = await prisma.tienda.update({
       where: { id: parseInt(String(id)) },
       data: { activo: false }
     });
