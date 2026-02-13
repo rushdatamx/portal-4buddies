@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+*.log
+uploads/
+.DS_Store
+
+/src/generated/prisma
+
+# Frontend
+web/node_modules/
+web/.env
+web/.next/
+web/out/
+
+# Data files
+data/*.csv
+data/*.xlsx
