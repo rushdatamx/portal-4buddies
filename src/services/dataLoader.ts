@@ -22,7 +22,7 @@ export async function loadToStaging(
   clienteId?: number // Para SELL-OUT donde sabemos el cliente
 ): Promise<LoadResult> {
   // Crear registro de carga
-  const carga = await prisma.carga.create({
+  const carga = await prisma.cargas.create({
     data: {
       tipo: sourceType,
       clienteId,
@@ -130,7 +130,7 @@ export async function loadToStaging(
 
   // Insertar en staging en batch
   if (stagingRecords.length > 0) {
-    await prisma.stagingRegistro.createMany({
+    await prisma.staging_registros.createMany({
       data: stagingRecords.map(r => ({
         ...r,
         datos: r.datos as object
@@ -139,7 +139,7 @@ export async function loadToStaging(
   }
 
   // Actualizar carga
-  await prisma.carga.update({
+  await prisma.cargas.update({
     where: { id: carga.id },
     data: {
       registrosNuevos: result.newRows,
@@ -391,7 +391,7 @@ export async function commitFromStaging(
   cargaId: number,
   includeUpdates: boolean = false
 ): Promise<{ inserted: number; updated: number; errors: string[] }> {
-  const carga = await prisma.carga.findUnique({
+  const carga = await prisma.cargas.findUnique({
     where: { id: cargaId },
     include: {
       stagingRegistros: {
@@ -431,11 +431,11 @@ export async function commitFromStaging(
   }
 
   // Limpiar staging y actualizar carga
-  await prisma.stagingRegistro.deleteMany({
+  await prisma.staging_registros.deleteMany({
     where: { cargaId }
   });
 
-  await prisma.carga.update({
+  await prisma.cargas.update({
     where: { id: cargaId },
     data: {
       estatus: 'completado',
@@ -457,7 +457,7 @@ async function insertNewRecord(
 ): Promise<void> {
   switch (sourceType) {
     case 'sell_in':
-      await prisma.sellIn.create({
+      await prisma.sell_in.create({
         data: {
           clienteId: data.clienteId as number,
           productoId: data.productoId as number,
@@ -474,7 +474,7 @@ async function insertNewRecord(
 
     case 'sell_out_heb_ventas':
     case 'sell_out_fda':
-      await prisma.sellOutVentas.create({
+      await prisma.sell_out_ventas.create({
         data: {
           clienteId: data.clienteId as number,
           tiendaId: data.tiendaId as number | null,
@@ -491,7 +491,7 @@ async function insertNewRecord(
       break;
 
     case 'sell_out_heb_inventario':
-      await prisma.sellOutInventario.create({
+      await prisma.sell_out_inventario.create({
         data: {
           clienteId: data.clienteId as number,
           tiendaId: data.tiendaId as number | null,
@@ -505,7 +505,7 @@ async function insertNewRecord(
       break;
 
     case 'catalogo_productos':
-      await prisma.producto.create({
+      await prisma.productos.create({
         data: {
           sku: data.sku as string,
           nombre: data.nombre as string,
@@ -517,7 +517,7 @@ async function insertNewRecord(
       break;
 
     case 'catalogo_mapeos':
-      await prisma.productoClienteMapeo.create({
+      await prisma.producto_cliente_mapeo.create({
         data: {
           productoId: data.productoId as number,
           clienteId: data.clienteId as number,
@@ -536,7 +536,7 @@ async function updateExistingRecord(
 ): Promise<void> {
   switch (sourceType) {
     case 'sell_in':
-      await prisma.sellIn.update({
+      await prisma.sell_in.update({
         where: { id: existingId },
         data: {
           cantidad: data.cantidad as number,
@@ -548,7 +548,7 @@ async function updateExistingRecord(
 
     case 'sell_out_heb_ventas':
     case 'sell_out_fda':
-      await prisma.sellOutVentas.update({
+      await prisma.sell_out_ventas.update({
         where: { id: existingId },
         data: {
           unidades: data.unidades as number,
@@ -559,7 +559,7 @@ async function updateExistingRecord(
       break;
 
     case 'sell_out_heb_inventario':
-      await prisma.sellOutInventario.update({
+      await prisma.sell_out_inventario.update({
         where: { id: existingId },
         data: {
           unidadesInventario: data.unidadesInventario as number
@@ -568,7 +568,7 @@ async function updateExistingRecord(
       break;
 
     case 'catalogo_productos':
-      await prisma.producto.update({
+      await prisma.productos.update({
         where: { id: existingId },
         data: {
           nombre: data.nombre as string,
@@ -580,7 +580,7 @@ async function updateExistingRecord(
       break;
 
     case 'catalogo_mapeos':
-      await prisma.productoClienteMapeo.update({
+      await prisma.producto_cliente_mapeo.update({
         where: { id: existingId },
         data: {
           productoId: data.productoId as number,
@@ -593,11 +593,11 @@ async function updateExistingRecord(
 
 // Cancelar carga (limpiar staging)
 export async function cancelCarga(cargaId: number): Promise<void> {
-  await prisma.stagingRegistro.deleteMany({
+  await prisma.staging_registros.deleteMany({
     where: { cargaId }
   });
 
-  await prisma.carga.update({
+  await prisma.cargas.update({
     where: { id: cargaId },
     data: { estatus: 'cancelado' }
   });

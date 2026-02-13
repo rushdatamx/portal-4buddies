@@ -47,16 +47,16 @@ router.post('/productos/import', uploadMiddleware.single('file'), async (req: Re
         const unidadMedida = String(row.data.unidadMedida || row.rawData['unidad_medida'] || row.rawData['unidad'] || '').trim() || null;
 
         // Upsert
-        const existente = await prisma.producto.findUnique({ where: { sku } });
+        const existente = await prisma.productos.findUnique({ where: { sku } });
 
         if (existente) {
-          await prisma.producto.update({
+          await prisma.productos.update({
             where: { sku },
             data: { nombre, categoria, subcategoria, unidadMedida }
           });
           updated++;
         } else {
-          await prisma.producto.create({
+          await prisma.productos.create({
             data: { sku, nombre, categoria, subcategoria, unidadMedida }
           });
           inserted++;
@@ -127,16 +127,16 @@ router.post('/clientes/import', uploadMiddleware.single('file'), async (req: Req
         const tieneSellOut = String(row.rawData['tiene_sell_out'] || row.rawData['sellout'] || '').toLowerCase() === 'true' ||
                             String(row.rawData['tiene_sell_out'] || row.rawData['sellout'] || '').toLowerCase() === 'si';
 
-        const existente = await prisma.cliente.findUnique({ where: { codigo } });
+        const existente = await prisma.clientes.findUnique({ where: { codigo } });
 
         if (existente) {
-          await prisma.cliente.update({
+          await prisma.clientes.update({
             where: { codigo },
             data: { nombre, tipo, tieneSellOut }
           });
           updated++;
         } else {
-          await prisma.cliente.create({
+          await prisma.clientes.create({
             data: { codigo, nombre, tipo, tieneSellOut }
           });
           inserted++;
@@ -256,20 +256,20 @@ router.post('/mapeos/import', uploadMiddleware.single('file'), async (req: Reque
         ).trim() || null;
 
         // Upsert mapeo
-        const existente = await prisma.productoClienteMapeo.findUnique({
+        const existente = await prisma.producto_cliente_mapeo.findUnique({
           where: {
             clienteId_skuCliente: { clienteId, skuCliente }
           }
         });
 
         if (existente) {
-          await prisma.productoClienteMapeo.update({
+          await prisma.producto_cliente_mapeo.update({
             where: { id: existente.id },
             data: { productoId, nombreCliente }
           });
           updated++;
         } else {
-          await prisma.productoClienteMapeo.create({
+          await prisma.producto_cliente_mapeo.create({
             data: { productoId, clienteId, skuCliente, nombreCliente }
           });
           inserted++;
@@ -359,7 +359,7 @@ router.post('/tiendas/import', uploadMiddleware.single('file'), async (req: Requ
         const estado = String(row.rawData['estado'] || '').trim() || null;
         const ciudad = String(row.rawData['ciudad'] || '').trim() || null;
 
-        const existente = await prisma.tienda.findUnique({
+        const existente = await prisma.tiendas.findUnique({
           where: {
             clienteId_codigoTienda: {
               clienteId: parseInt(clienteId),
@@ -369,13 +369,13 @@ router.post('/tiendas/import', uploadMiddleware.single('file'), async (req: Requ
         });
 
         if (existente) {
-          await prisma.tienda.update({
+          await prisma.tiendas.update({
             where: { id: existente.id },
             data: { nombre, plaza, estado, ciudad }
           });
           updated++;
         } else {
-          await prisma.tienda.create({
+          await prisma.tiendas.create({
             data: {
               clienteId: parseInt(clienteId),
               codigoTienda,
